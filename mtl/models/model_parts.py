@@ -154,12 +154,37 @@ class ASPP(torch.nn.Module):
     def __init__(self, in_channels, out_channels, rates=(3, 6, 9)):
         super().__init__()
         # TODO: Implement ASPP properly instead of the following
-        self.conv_out = ASPPpart(in_channels, out_channels, kernel_size=1, stride=1, padding=0, dilation=1)
+        modules = []
+        rates = [2*x for x in rates]
+        modules.append(ASPPpart(in_channels, out_channels, kernel_size=1, stride=1, padding=0, dilation=1))
+        for rate in rates:
+            modules.append(ASPPpart(in_channels, out_channels, kernel_size=3, stride=1, padding=rate, dilation=rate))
+       
+        #global_avg = torch.nn.AdaptiveAvgPool2d(1) does not work gives [256,512, H, W] instead of [256,256, H,W]
+        # therefore apply convolution with correct output channels
+        global_avg = torch.nn.Sequential(torch.nn.AdaptiveAvgPool2d(1),
+                                         torch.nn.Conv2d(in_channels, out_channels, kernel_size = 1))
+        modules.append(global_avg)
+        self.aspp_convs = torch.nn.ModuleList(modules)
+        # At this stage when called, already concatenated so we know how many out channels we have for each conv.
+        # So total after concatenation of all diff layers of conv is len(self.aspp_convs)*out_channels
+        self.conv_1x1 = torch.nn.Conv2d(out_channels*len(self.aspp_convs), out_channels, kernel_size = 1)
+
+        #self.conv_out = ASPPpart(in_channels, out_channels, kernel_size=1, stride=1, padding=0, dilation=1)
 
     def forward(self, x):
         # TODO: Implement ASPP properly instead of the following
-        out = self.conv_out(x)
-        return out
+        res = []                           
+        features_h = x.size()[2] # is height of feature map image
+        features_w = x.size()[3] # is width of feature map image
+        for layer in self.aspp_convs:
+            res.append(layer(x))
+        #res[4] is the output of the average pooling but has h= 1, w = 1 so we upsample it to the needed height and width
+        res[4] = F.interpolate(res[4],(features_h, features_w), mode = 'bilinear')
+        res = torch.cat(res, dim = 1)
+        return self.conv_1x1(res)
+        #out = self.conv_out(x)
+        #return out
 
 
 class SelfAttention(torch.nn.Module):
