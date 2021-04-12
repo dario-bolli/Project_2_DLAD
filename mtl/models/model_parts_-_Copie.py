@@ -124,7 +124,7 @@ class DecoderDeeplabV3p(torch.nn.Module):
 
         # TODO: Implement a proper decoder with skip connections instead of the following
         self.features_to_concatenation = torch.nn.Conv2d(bottleneck_ch, num_out_ch, kernel_size=1, stride=1)
-        self.concatenation_to_predictions = torch.nn.Conv2d(num_out_ch, num_out_ch, kernel_size=3, stride=1)
+        self.concatenation_to_predictions = torch.nn.Conv2d(2*num_out_ch, num_out_ch, kernel_size=3, stride=1)
 
     def forward(self, features_bottleneck, features_skip_4x):
         """
@@ -144,8 +144,8 @@ class DecoderDeeplabV3p(torch.nn.Module):
         #concatenation of lowest feature and upsampled output of ASPP
         features_cat = torch.stack([features_lowest,features_ASPP])
         #3x3 conv2d on concatenated features
-        features_cat = concatenation_to_predictions(features_cat)
-        return features_cat
+        predictions = concatenation_to_predictions(features_cat)
+        return predictions, features_cat
 
 class ASPPpart(torch.nn.Sequential):
     def __init__(self, in_channels, out_channels, kernel_size, stride, padding, dilation):
