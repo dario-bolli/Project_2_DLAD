@@ -123,7 +123,8 @@ class DecoderDeeplabV3p(torch.nn.Module):
         super(DecoderDeeplabV3p, self).__init__()
 
         # TODO: Implement a proper decoder with skip connections instead of the following
-        self.features_to_predictions = torch.nn.Conv2d(bottleneck_ch, num_out_ch, kernel_size=1, stride=1)
+        self.features_to_concatenation = torch.nn.Conv2d(bottleneck_ch, skip_4x_ch, kernel_size=1, stride=1)
+        self.concatenation_to_predictions = torch.nn.Conv2d(bottleneck_ch+skip_4x_ch, num_out_ch, kernel_size=3, stride=1)
 
     def forward(self, features_bottleneck, features_skip_4x):
         """
@@ -134,12 +135,17 @@ class DecoderDeeplabV3p(torch.nn.Module):
         """
         # TODO: Implement a proper decoder with skip connections instead of the following; keep returned
         #       tensors in the same order and of the same shape.
-        features_4x = F.interpolate(
+        #upsample ASPP features by 4
+        features_ASPP = F.interpolate(
             features_bottleneck, size=features_skip_4x.shape[2:], mode='bilinear', align_corners=False
         )
-        predictions_4x = self.features_to_predictions(features_4x)
-        return predictions_4x, features_4x
-
+        #1x1 conv2d on lowest feature (skip)
+        features_skip = self.features_to_concatenation(features_skip_4x)
+        #concatenation of lowest feature and upsampled output of ASPP
+        features_cat = torch.cat([features_lowest,features_ASPP], dim=1)
+        #3x3 conv2d on concatenated features
+        predictions = concatenation_to_predictions(features_cat)
+        return predictions, features_cat
 
 class ASPPpart(torch.nn.Sequential):
     def __init__(self, in_channels, out_channels, kernel_size, stride, padding, dilation):
@@ -149,11 +155,10 @@ class ASPPpart(torch.nn.Sequential):
             torch.nn.ReLU(),
         )
 
-
 class ASPP(torch.nn.Module):
     def __init__(self, in_channels, out_channels, rates=(3, 6, 9)):
         super().__init__()
-        # TODO: Implement ASPP properly instead of the following
+        # TODO
         modules = []
         rates = [2*x for x in rates]
         modules.append(ASPPpart(in_channels, out_channels, kernel_size=1, stride=1, padding=0, dilation=1))
@@ -185,6 +190,8 @@ class ASPP(torch.nn.Module):
         return self.conv_1x1(res)
         #out = self.conv_out(x)
         #return out
+
+
 
 
 class SelfAttention(torch.nn.Module):
