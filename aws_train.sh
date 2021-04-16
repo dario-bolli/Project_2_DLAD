@@ -24,9 +24,11 @@ cd /home/ubuntu/code/
 python -m mtl.scripts.train \
   --log_dir /home/ubuntu/results/ \
   --dataset_root /home/ubuntu/miniscapes/ \
-  --name Default \
-  --optimizer sgd \
-  --optimizer_lr 0.01
+  --name adam_0.0001_16_64_pretrained_dilation_aspp\
+  --optimizer adam \
+  --optimizer_lr 0.0001\
+  --batch_size 16\
+  --num_epochs 64
   # ... you can pass further arguments as specified in utils/config.py
 
 # If you want to run multiple experiments after each other, just call the training script multiple times.
