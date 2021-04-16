@@ -123,8 +123,8 @@ class DecoderDeeplabV3p(torch.nn.Module):
         super(DecoderDeeplabV3p, self).__init__()
 
         # TODO: Implement a proper decoder with skip connections instead of the following
-        self.features_to_concatenation = torch.nn.Conv2d(bottleneck_ch, skip_4x_ch, kernel_size=1, stride=1)
-        self.concatenation_to_predictions = torch.nn.Conv2d(bottleneck_ch+skip_4x_ch, num_out_ch, kernel_size=3, stride=1)
+        self.features_to_concatenation = torch.nn.Conv2d(skip_4x_ch, 48, kernel_size=1, stride=1)
+        self.concatenation_to_predictions = torch.nn.Conv2d(bottleneck_ch+48, num_out_ch, kernel_size=3, stride=1)
 
     def forward(self, features_bottleneck, features_skip_4x):
         """
@@ -142,9 +142,9 @@ class DecoderDeeplabV3p(torch.nn.Module):
         #1x1 conv2d on lowest feature (skip)
         features_skip = self.features_to_concatenation(features_skip_4x)
         #concatenation of lowest feature and upsampled output of ASPP
-        features_cat = torch.cat([features_lowest,features_ASPP], dim=1)
+        features_cat = torch.cat([features_skip,features_ASPP], dim=1)
         #3x3 conv2d on concatenated features
-        predictions = concatenation_to_predictions(features_cat)
+        predictions = self.concatenation_to_predictions(features_cat)
         return predictions, features_cat
 
 class ASPPpart(torch.nn.Sequential):
@@ -185,7 +185,7 @@ class ASPP(torch.nn.Module):
         for layer in self.aspp_convs:
             res.append(layer(x))
         #res[4] is the output of the average pooling but has h= 1, w = 1 so we upsample it to the needed height and width
-        res[4] = F.interpolate(res[4],(features_h, features_w), mode = 'bilinear')
+        res[4] = F.interpolate(res[4],(features_h, features_w), mode = 'bilinear', align_corners=False)
         res = torch.cat(res, dim = 1)
         return self.conv_1x1(res)
         #out = self.conv_out(x)
