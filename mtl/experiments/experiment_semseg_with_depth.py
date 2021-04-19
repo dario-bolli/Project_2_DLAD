@@ -93,7 +93,7 @@ class ExperimentSemsegDepth(pl.LightningModule):
         y_hat_depth = y_hat[MOD_DEPTH]
 
         if type(y_hat_semseg) is list:
-            # deep supervision scenario: penalize all predicitons in the list and average losses
+            # deep supervision scenario: penalize all predictions in the list and average losses
             loss_semseg = sum([self.loss_semseg(y_hat_semseg_i, y_semseg_lbl) for y_hat_semseg_i in y_hat_semseg])
             loss_depth = sum([self.loss_depth(y_hat_depth_i, y_depth) for y_hat_depth_i in y_hat_depth])
             loss_semseg = loss_semseg / len(y_hat_semseg)

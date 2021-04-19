@@ -12,9 +12,9 @@ class ModelDeepLabV3Plus(torch.nn.Module):
 
         self.encoder = Encoder(
             cfg.model_encoder_name,
-            pretrained=False,
+            pretrained=True,
             zero_init_residual=True,
-            replace_stride_with_dilation=(False, False, False),
+            replace_stride_with_dilation=(False, False, True),
         )
 
         ch_out_encoder_bottleneck, ch_out_encoder_4x = get_encoder_channel_counts(cfg.model_encoder_name)
@@ -29,15 +29,15 @@ class ModelDeepLabV3Plus(torch.nn.Module):
         features = self.encoder(x)
 
         # Uncomment to see the scales of feature pyramid with their respective number of channels.
-        # print(", ".join([f"{k}:{v.shape[1]}" for k, v in features.items()]))
-
+        print(", ".join([f"{k}:{v.shape[1]}" for k, v in features.items()]))
+        print("sortie du DCNN size: ", features[4].shape)
         lowest_scale = max(features.keys())
 
         features_lowest = features[lowest_scale]
 
         features_tasks = self.aspp(features_lowest)
-
-        predictions_4x, _ = self.decoder(features_tasks, features[4])
+        print("sortie du ASPP size: ", features_tasks.shape)
+        predictions_4x,_ = self.decoder(features_tasks, features[4])
 
         predictions_1x = F.interpolate(predictions_4x, size=input_resolution, mode='bilinear', align_corners=False)
 

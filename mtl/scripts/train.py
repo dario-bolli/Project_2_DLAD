@@ -40,7 +40,7 @@ def main():
     )
     wandb_logger = WandbLogger(
         name=run_name,
-        project='DLAD-Ex2',
+        project='DLAD-Ex2-BranchedModel',
         save_dir=os.path.join(cfg.log_dir))
 
     checkpoint_local_callback = ModelCheckpoint(
@@ -100,10 +100,10 @@ def main():
         weights_save_path=None,
         num_sanity_val_steps=1,
         # Uncomment the following options if you want to try out framework changes without training too long
-        # limit_train_batches=20,
-        # limit_val_batches=10,
-        # limit_test_batches=10,
-        # log_every_n_steps=10,
+        #limit_train_batches=20,
+        #limit_val_batches=10,
+        #limit_test_batches=10,
+        #log_every_n_steps=10,
     )
 
     if not cfg.prepare_submission:

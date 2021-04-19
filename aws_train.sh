@@ -24,9 +24,12 @@ cd /home/ubuntu/code/
 python -m mtl.scripts.train \
   --log_dir /home/ubuntu/results/ \
   --dataset_root /home/ubuntu/miniscapes/ \
-  --name Default \
-  --optimizer sgd \
-  --optimizer_lr 0.01
+  --name branched_test_4_32\
+  --optimizer adam \
+  --optimizer_lr 0.0001\
+  --batch_size 4\
+  --num_epochs 32\
+  --model_name branched
   # ... you can pass further arguments as specified in utils/config.py
 
 # If you want to run multiple experiments after each other, just call the training script multiple times.

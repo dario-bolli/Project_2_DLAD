@@ -8,7 +8,7 @@ AWS = 'aws'   # path to `aws` CLI executable
 
 PERMISSION_FILE_PATH = '~/.ssh/dlad-aws.pem'
 AMI = 'ami-05f6982c11ca3027d' # Deep Learning AMI (Ubuntu 18.04) Version 41.0
-INSTANCE_TYPE = 'p2.xlarge'
+INSTANCE_TYPE = 'm5.xlarge'
 VOLUME_TYPE = 'gp2'
 REGION = 'us-east-1'
 NON_ROOT = 'ubuntu'
