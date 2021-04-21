@@ -54,10 +54,8 @@ class ModelBranched(torch.nn.Module):
         predictions_1x_depth = F.interpolate(predictions_4x_depth, size=input_resolution, mode='bilinear', align_corners=False)
         out = {}
         offset = 0
-        
-        print("dictionary", self.outputs_desc)
+
         for task, num_ch in self.outputs_desc.items():
-            print(task, num_ch)
             if task == 'semseg':
                 out[task] = predictions_1x_semseg[:, offset:offset+num_ch, :, :]
                 offset += num_ch
@@ -66,6 +64,4 @@ class ModelBranched(torch.nn.Module):
 
             else:
                 print("mod erreur, should be either MOD_SEMSEG or MOD_DEPTH")
-            
-            print("offset",offset)
         return out
