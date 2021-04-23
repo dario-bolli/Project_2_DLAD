@@ -24,9 +24,13 @@ cd /home/ubuntu/code/
 python -m mtl.scripts.train \
   --log_dir /home/ubuntu/results/ \
   --dataset_root /home/ubuntu/miniscapes/ \
-  --name Default \
-  --optimizer sgd \
-  --optimizer_lr 0.01
+  --name 4_16_pretrained_dil_0.6_depth \
+  --optimizer adam \
+  --optimizer_lr 0.0001\
+  --batch_size 4\
+  --num_epochs 16\
+  --loss_weight_semseg 0.4\
+  --loss_weight_depth 0.6
   # ... you can pass further arguments as specified in utils/config.py
 
 # If you want to run multiple experiments after each other, just call the training script multiple times.

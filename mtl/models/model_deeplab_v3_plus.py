@@ -12,9 +12,9 @@ class ModelDeepLabV3Plus(torch.nn.Module):
 
         self.encoder = Encoder(
             cfg.model_encoder_name,
-            pretrained=False,
+            pretrained=True,
             zero_init_residual=True,
-            replace_stride_with_dilation=(False, False, False),
+            replace_stride_with_dilation=(False, False, True),
         )
 
         ch_out_encoder_bottleneck, ch_out_encoder_4x = get_encoder_channel_counts(cfg.model_encoder_name)
