@@ -127,9 +127,9 @@ class DecoderDeeplabV3p(torch.nn.Module):
         self.features_to_concatenation = torch.nn.Sequential(torch.nn.Conv2d(skip_4x_ch, 48, kernel_size=1, stride=1),
                                                             torch.nn.BatchNorm2d(48),torch.nn.ReLU())
         self.concatenation_to_predictions = torch.nn.Sequential(torch.nn.Conv2d(bottleneck_ch+48, num_out_ch, kernel_size=3, padding=2),
-                                                                torch.nn.BatchNorm2d(num_out_ch),        
-                                                                torch.nn.Conv2d(num_out_ch, num_out_ch, kernel_size=3, padding=2),
-                                                                torch.nn.BatchNorm2d(num_out_ch))
+                                                                torch.nn.BatchNorm2d(num_out_ch),
+                                                                torch.nn.ReLU(),        
+                                                                torch.nn.Conv2d(num_out_ch, num_out_ch, kernel_size=3, padding=2))
 
     def forward(self, features_bottleneck, features_skip_4x):
         """
@@ -173,13 +173,16 @@ class ASPP(torch.nn.Module):
         #global_avg = torch.nn.AdaptiveAvgPool2d(1) does not work gives [256,512, H, W] instead of [256,256, H,W]
         # therefore apply convolution with correct output channels
         global_avg = torch.nn.Sequential(torch.nn.AdaptiveAvgPool2d(1),
-                                         torch.nn.Conv2d(in_channels, out_channels, kernel_size = 1))
+                                         torch.nn.Conv2d(in_channels, out_channels, kernel_size = 1),
+                                         torch.nn.BatchNorm2d(out_channels),
+                                         torch.nn.ReLU())
         modules.append(global_avg)
         self.aspp_convs = torch.nn.ModuleList(modules)
         # At this stage when called, already concatenated so we know how many out channels we have for each conv.
         # So total after concatenation of all diff layers of conv is len(self.aspp_convs)*out_channels
-        self.conv_1x1 = torch.nn.Conv2d(out_channels*len(self.aspp_convs), out_channels, kernel_size = 1)
-
+        self.conv_1x1 = torch.nn.Sequential(torch.nn.Conv2d(out_channels*len(self.aspp_convs), out_channels, kernel_size = 1),
+                                            torch.nn.BatchNorm2d(out_channels),
+                                            torch.nn.ReLU())
         #self.conv_out = ASPPpart(in_channels, out_channels, kernel_size=1, stride=1, padding=0, dilation=1)
 
     def forward(self, x):

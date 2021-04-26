@@ -40,7 +40,7 @@ def main():
     )
     wandb_logger = WandbLogger(
         name=run_name,
-        project='DLAD-Ex2-BranchedModel',
+        project='DLAD-Ex2-4-16',
         save_dir=os.path.join(cfg.log_dir))
 
     checkpoint_local_callback = ModelCheckpoint(

@@ -61,6 +61,7 @@ class ModelBranched(torch.nn.Module):
                 offset += num_ch
             elif task == 'depth':
                 out[task] = predictions_1x_depth[:,:, :, :]
+                offset += num_ch
 
             else:
                 print("mod erreur, should be either MOD_SEMSEG or MOD_DEPTH")
