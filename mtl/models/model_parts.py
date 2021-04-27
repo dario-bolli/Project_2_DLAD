@@ -152,6 +152,34 @@ class DecoderDeeplabV3p(torch.nn.Module):
         predictions = self.concatenation_to_predictions(features_cat)
         return predictions, features_cat
 
+class Decoder(torch.nn.Module):
+    def __init__(self, attention_ch, out_DeepLab_ch, num_out_ch):
+        super(DecoderDeeplabV3p, self).__init__()
+
+        # TODO: Implement a proper decoder with skip connections instead of the following
+        #48 is the best channels number according to paper
+        self.concatenation_to_predictions = torch.nn.Sequential(torch.nn.Conv2d(attention_ch+out_DeepLab_ch, num_out_ch, kernel_size=3, padding=2),
+                                                                torch.nn.BatchNorm2d(num_out_ch),
+                                                                torch.nn.ReLU(),        
+                                                                torch.nn.Conv2d(num_out_ch, num_out_ch, kernel_size=3, padding=2),
+                                                                torch.nn.BatchNorm2d(num_out_ch))
+
+    def forward(self, features_attention, features_out_decoder):
+        """
+        DeepLabV3+ style decoder
+        :param features_bottleneck: bottleneck features of scale > 4
+        :param features_skip_4x: features of encoder of scale == 4
+        :return: features with 256 channels and the final tensor of predictions
+        """
+        # TODO: Implement a proper decoder with skip connections instead of the following; keep returned
+        #       tensors in the same order and of the same shape.
+
+        #concatenation of features out of self-attention module and out of decoderDeeplab module
+        features_cat = torch.cat([features_attention,features_out_decoder], dim=1)
+        #2 3x3 conv2d on concatenated features
+        predictions = self.concatenation_to_predictions(features_cat)
+        return predictions, features_cat
+
 class ASPPpart(torch.nn.Sequential):
     def __init__(self, in_channels, out_channels, kernel_size, stride, padding, dilation):
         super().__init__(
@@ -198,7 +226,6 @@ class ASPP(torch.nn.Module):
         return self.conv_1x1(res)
         #out = self.conv_out(x)
         #return out
-
 
 
 
