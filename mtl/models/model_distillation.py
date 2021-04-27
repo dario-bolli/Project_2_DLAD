@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 
-from mtl.models.model_parts import Encoder, get_encoder_channel_counts, ASPP, DecoderDeeplabV3p, Decoder
+from mtl.models.model_parts import Encoder, get_encoder_channel_counts, ASPP, DecoderDeeplabV3p,SelfAttention, Decoder
 
 
 class ModelDistillation(torch.nn.Module):
