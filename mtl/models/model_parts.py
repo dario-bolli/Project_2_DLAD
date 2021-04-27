@@ -126,10 +126,10 @@ class DecoderDeeplabV3p(torch.nn.Module):
         #48 is the best channels number according to paper
         self.features_to_concatenation = torch.nn.Sequential(torch.nn.Conv2d(skip_4x_ch, 48, kernel_size=1, stride=1),
                                                             torch.nn.BatchNorm2d(48),torch.nn.ReLU())
-        self.concatenation_to_predictions = torch.nn.Sequential(torch.nn.Conv2d(bottleneck_ch+48, num_out_ch, kernel_size=3, padding=2),
-                                                                torch.nn.BatchNorm2d(num_out_ch),
+        self.concatenation_to_predictions = torch.nn.Sequential(torch.nn.Conv2d(bottleneck_ch+48, bottleneck_ch, kernel_size=3, padding=2),
+                                                                torch.nn.BatchNorm2d(bottleneck_ch),
                                                                 torch.nn.ReLU(),        
-                                                                torch.nn.Conv2d(num_out_ch, num_out_ch, kernel_size=3, padding=2))
+                                                                torch.nn.Conv2d(bottleneck_ch, num_out_ch, kernel_size=3, padding=2))
 
     def forward(self, features_bottleneck, features_skip_4x):
         """
@@ -154,7 +154,7 @@ class DecoderDeeplabV3p(torch.nn.Module):
 
 class Decoder(torch.nn.Module):
     def __init__(self, attention_ch, out_DeepLab_ch, num_out_ch):
-        super(DecoderDeeplabV3p, self).__init__()
+        super().__init__()
 
         # TODO: Implement a proper decoder with skip connections instead of the following
         #48 is the best channels number according to paper
