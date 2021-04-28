@@ -1,3 +1,9 @@
+# TO run
+-ASPP 2 conv3x3 puis interpolate (sans conv1x1) 
+-ASPP 1 conv3x3 + conv1x1 puis interpolate (en fonction des performances des 2conv3x3)
+-branched model avec la meilleure architecture ASPP
+-Task3 avec la meilleure architecture ASPP
+
 # DLAD Exercise 2 
 
 Multitask Semantic Segmentation and Monocular Depth prediction for Autonomous Driving
