@@ -24,14 +24,12 @@ cd /home/ubuntu/code/
 python -m mtl.scripts.train \
   --log_dir /home/ubuntu/results/ \
   --dataset_root /home/ubuntu/miniscapes/ \
-  --name aspp_4_25\
+  --name best_4_25_branched\
   --optimizer adam \
   --optimizer_lr 0.0001\
   --batch_size 4\
   --num_epochs 25\
-  #--loss_weight_semseg 0.6\
-  #--loss_weight_depth 0.4\
-  #--model_name branched
+  --model_name branched
   #--resume s3://testdarionico/G5_0423-1529_branched_test_9cb16/
   
   # ... you can pass further arguments as specified in utils/config.py

@@ -126,11 +126,11 @@ class DecoderDeeplabV3p(torch.nn.Module):
         #48 is the best channels number according to paper
         self.features_to_concatenation = torch.nn.Sequential(torch.nn.Conv2d(skip_4x_ch, 48, kernel_size=1, stride=1),
                                                             torch.nn.BatchNorm2d(48),torch.nn.ReLU())
-        self.concatenation_to_predictions = torch.nn.Sequential(torch.nn.Conv2d(bottleneck_ch+48, num_out_ch, kernel_size=3, padding=2),
-                                                                torch.nn.BatchNorm2d(num_out_ch),
-                                                                torch.nn.ReLU(),        
-                                                                torch.nn.Conv2d(num_out_ch, num_out_ch, kernel_size=3, padding=2))
-
+        self.conv3x3 = torch.nn.Sequential(torch.nn.Conv2d(bottleneck_ch+48, 256, kernel_size=3, padding=2, bias = False),
+                                           torch.nn.BatchNorm2d(256),
+                                           torch.nn.ReLU()) # TEST with bias = true ?
+        self.concatenation_to_predictions = torch.nn.Conv2d(256, num_out_ch, kernel_size=1, stride=1)      
+                                                              
     def forward(self, features_bottleneck, features_skip_4x):
         """
         DeepLabV3+ style decoder
@@ -147,7 +147,7 @@ class DecoderDeeplabV3p(torch.nn.Module):
         #1x1 conv2d on lowest feature (skip)
         features_skip = self.features_to_concatenation(features_skip_4x)
         #concatenation of lowest feature and upsampled output of ASPP
-        features_cat = torch.cat([features_skip,features_ASPP], dim=1)
+        features_cat = self.conv3x3(torch.cat([features_skip,features_ASPP], dim=1))
         #2 3x3 conv2d on concatenated features
         predictions = self.concatenation_to_predictions(features_cat)
         return predictions, features_cat
@@ -170,37 +170,30 @@ class ASPP(torch.nn.Module):
         for rate in rates:
             modules.append(ASPPpart(in_channels, out_channels, kernel_size=3, stride=1, padding=rate, dilation=rate))
        
-        #global_avg = torch.nn.AdaptiveAvgPool2d(1) does not work gives [256,512, H, W] instead of [256,256, H,W]
+        #global_avg = torch.nn.AdaptiveAvgPool2d(1) gives [256,512, H, W] instead of [256,256, H,W]
         # therefore apply convolution with correct output channels
         global_avg = torch.nn.Sequential(torch.nn.AdaptiveAvgPool2d(1),
-                                         torch.nn.Conv2d(in_channels, out_channels, kernel_size = 1),
+                                         torch.nn.Conv2d(in_channels, out_channels, kernel_size = 1, bias = False),
                                          torch.nn.BatchNorm2d(out_channels),
                                          torch.nn.ReLU())
         modules.append(global_avg)
         self.aspp_convs = torch.nn.ModuleList(modules)
-        # At this stage when called, already concatenated so we know how many out channels we have for each conv.
-        # So total after concatenation of all diff layers of conv is len(self.aspp_convs)*out_channels
-        self.conv_1x1 = torch.nn.Sequential(torch.nn.Conv2d(out_channels*len(self.aspp_convs), out_channels, kernel_size = 1),
+        # Total channels after concatenation of all layers of the aspp is len(self.aspp_convs)*out_channels
+        self.conv_1x1 = torch.nn.Sequential(torch.nn.Conv2d(out_channels*len(self.aspp_convs), out_channels, kernel_size = 1, bias = False),
                                             torch.nn.BatchNorm2d(out_channels),
                                             torch.nn.ReLU())
-        #self.conv_out = ASPPpart(in_channels, out_channels, kernel_size=1, stride=1, padding=0, dilation=1)
-
+        # TEST with bias = true ?
     def forward(self, x):
         # TODO: Implement ASPP properly instead of the following
-        res = []                           
-        features_h = x.size()[2] # is height of feature map image
-        features_w = x.size()[3] # is width of feature map image
+        aspp_net = []
+        resolution_h_w = (x.shape[2], x.shape[3]) # height and width of feature map                      
         for layer in self.aspp_convs:
-            res.append(layer(x))
-        #res[4] is the output of the average pooling but has h= 1, w = 1 so we upsample it to the needed height and width
-        res[4] = F.interpolate(res[4],(features_h, features_w), mode = 'bilinear', align_corners=False)
-        res = torch.cat(res, dim = 1)
-        return self.conv_1x1(res)
-        #out = self.conv_out(x)
-        #return out
-
-
-
+            aspp_net.append(layer(x))
+        #aspp_net[4] is the output of the average pooling but has h= 1, w = 1 so we upsample it to the needed height and width
+        aspp_net[4] = F.interpolate(aspp_net[4],resolution_h_w, mode = 'bilinear', align_corners=False)
+        aspp_net = torch.cat(aspp_net, dim = 1)
+        return self.conv_1x1(aspp_net)
+      
 
 class SelfAttention(torch.nn.Module):
     def __init__(self, in_channels, out_channels):
