@@ -126,7 +126,10 @@ class DecoderDeeplabV3p(torch.nn.Module):
         #48 is the best channels number according to paper
         self.features_to_concatenation = torch.nn.Sequential(torch.nn.Conv2d(skip_4x_ch, 48, kernel_size=1, stride=1),
                                                             torch.nn.BatchNorm2d(48),torch.nn.ReLU())
-        self.conv3x3 = torch.nn.Sequential(torch.nn.Conv2d(bottleneck_ch+48, 256, kernel_size=3, padding=2, bias = False),
+        self.conv3x3 = torch.nn.Sequential(torch.nn.Conv2d(bottleneck_ch+48, 256, kernel_size=3, padding=1, bias = False),
+                                           torch.nn.BatchNorm2d(256),
+                                           torch.nn.ReLU(),
+                                           torch.nn.Conv2d(256, 256, kernel_size=3, padding=1, bias = False),
                                            torch.nn.BatchNorm2d(256),
                                            torch.nn.ReLU()) # TEST with bias = true ?
         self.concatenation_to_predictions = torch.nn.Conv2d(256, num_out_ch, kernel_size=1, stride=1)      
