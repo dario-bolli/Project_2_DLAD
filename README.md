@@ -7,6 +7,17 @@
 
 -Task3 avec la meilleure architecture ASPP
 
+# TO SUBMIT TO CODALAB
+
+-> **Runs in batch size 4 and num epoch 16:**
+Q1a)
+- Best SGD: lr = 0.075, WandB: G5_0408-0855_sgd_0.075_32012
+- Best Adam: lr = 0.0001, WandB: G5_0406-1928_adam_0.0001_5bdd2
+Q1b)
+- Batch size 8, num epoch 32: WandB: G5_0409-0814_adam_0.0001_8_32_ca036
+_Performs better at epoch 32, but is grader is lower at epoch 16 compared to batch size 4_
+- Batch size 16, num epoch 64: WandB: G5_0410-0930_adam_is_0.0001_16_64_c5452
+
 # DLAD Exercise 2 
 
 Multitask Semantic Segmentation and Monocular Depth prediction for Autonomous Driving
