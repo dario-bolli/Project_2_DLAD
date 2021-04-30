@@ -128,8 +128,11 @@ class DecoderDeeplabV3p(torch.nn.Module):
                                                             torch.nn.BatchNorm2d(48),torch.nn.ReLU())
         self.conv3x3 = torch.nn.Sequential(torch.nn.Conv2d(bottleneck_ch+48, 256, kernel_size=3, padding=1, bias = False),
                                            torch.nn.BatchNorm2d(256),
+                                           torch.nn.ReLU(),
+                                           torch.nn.Conv2d(256, 256, kernel_size=3, padding=1, bias = False),
+                                           torch.nn.BatchNorm2d(256),
                                            torch.nn.ReLU()) # TEST with bias = true ?
-        self.concatenation_to_predictions = torch.nn.Conv2d(256, num_out_ch, kernel_size=1, stride=1)      
+        self.concatenation_to_predictions = torch.nn.Conv2d(256, num_out_ch, kernel_size=1, stride=1)       
                                                               
     def forward(self, features_bottleneck, features_skip_4x):
         """
@@ -146,18 +149,18 @@ class DecoderDeeplabV3p(torch.nn.Module):
         )
         #1x1 conv2d on lowest feature (skip)
         features_skip = self.features_to_concatenation(features_skip_4x)
-        #concatenation of lowest feature and upsampled output of ASPP
+        #concatenation of lowest feature and upsampled output of ASPP + 2 3x3 conv2d on concatenated features
         features_cat = self.conv3x3(torch.cat([features_skip,features_ASPP], dim=1))
-        #2 3x3 conv2d on concatenated features
+        #last 1x1 conv2d to get predictions
         predictions = self.concatenation_to_predictions(features_cat)
         return predictions, features_cat
 
+
 class Decoder(torch.nn.Module):
     def __init__(self, attention_ch, out_DeepLab_ch, num_out_ch):
-        super().__init__()
+        super(Decoder, self).__init__()
 
         # TODO: Implement a proper decoder with skip connections instead of the following
-        
         self.conv3x3 = torch.nn.Sequential(torch.nn.Conv2d(out_DeepLab_ch, 256, kernel_size=3, padding=1, bias = False),
                                            torch.nn.BatchNorm2d(256),
                                            torch.nn.ReLU()) # TEST with bias = true ?
@@ -178,7 +181,8 @@ class Decoder(torch.nn.Module):
 
         #sum of self-attention features and output of first decoder features
         #ATTENTION features_out_decoder nb channels must be equal to features_attention nb channels
-        summed_features = torch.zeros(features_out_decoder.shape)
+        summed_features = features_attention
+        #problem with cuda device torch.zeros(features_out_decoder.shape)
         for i in range(features_out_decoder.shape[1]):
             summed_features[:,i,:,:] =  features_attention[:,i,:,:]+features_out_decoder[:,i,:,:]
         features_intermediate = self.conv3x3(summed_features)
