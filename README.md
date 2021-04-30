@@ -10,13 +10,19 @@
 # TO SUBMIT TO CODALAB
 
 -> **Runs in batch size 4 and num epoch 16:**
-Q1a)
+
+1. Q1a)
 - Best SGD: lr = 0.075, WandB: G5_0408-0855_sgd_0.075_32012
 - Best Adam: lr = 0.0001, WandB: G5_0406-1928_adam_0.0001_5bdd2
-Q1b)
+
+2. Q1b)
 - Batch size 8, num epoch 32: WandB: G5_0409-0814_adam_0.0001_8_32_ca036
-_Performs better at epoch 32, but is grader is lower at epoch 16 compared to batch size 4_
+- _Performs better at epoch 32, but is grader is lower at epoch 16 compared to batch size 4_
 - Batch size 16, num epoch 64: WandB: G5_0410-0930_adam_is_0.0001_16_64_c5452
+
+3. Available is batch size 8 and epochs 32
+- 0.7 depth, semseg 0.3 (best): G5_0411-0757_adam_0.0001_8_32_0.7depth_a6901
+- 0.3 depth, semseg 0.7 (worst): G5_0409-0818_adam_0.0001_8_32_0.3depth_c1b69
 
 # DLAD Exercise 2 
 
