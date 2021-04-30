@@ -11,6 +11,7 @@
 
 -> **Runs in batch size 4 and num epoch 16:**
 
+- **_In DLAD-EX-2_**
 1. Q1a)
 - Best SGD: lr = 0.075, WandB: G5_0408-0855_sgd_0.075_32012
 - Best Adam: lr = 0.0001, WandB: G5_0406-1928_adam_0.0001_5bdd2
@@ -21,8 +22,30 @@
 - Batch size 16, num epoch 64: WandB: G5_0410-0930_adam_is_0.0001_16_64_c5452
 
 3. Available is batch size 8 and epochs 32
-- 0.7 depth, semseg 0.3 (best): G5_0411-0757_adam_0.0001_8_32_0.7depth_a6901
-- 0.3 depth, semseg 0.7 (worst): G5_0409-0818_adam_0.0001_8_32_0.3depth_c1b69
+- 0.7 depth, semseg 0.3 (best): WandB: G5_0411-0757_adam_0.0001_8_32_0.7depth_a6901
+- 0.3 depth, semseg 0.7 (worst): WandB: G5_0409-0818_adam_0.0001_8_32_0.3depth_c1b69
+- **redo with batch size 4 and num epoch 16** ?!!
+
+4. Init with Imagenet (pretrained)
+- only have this one in 8-16 for now: G5_0408-1628_adam_lr0_is_0.0001_8_16_pretrained_
+- **redo it in 4-16 to compare**
+
+5. Dilated convolutions  (False, False, True)
+- only have 16 -64 for now G5_0411-0807_adam_0.0001_16_64_pretrained_dilation
+- redo training with 4-16, pretrained, dilation only in task weighting 0.5 0.5 ?
+- we have: **_In DLAD-EX2-4-16_**
+- G5_0423-0955_4_16_pretrained_dil_0.4_depth_4e3b8
+- G5_0423-0946_4_16_pretrained_dil_0.6_depth_2c034
+- performing nearly the same
+- If we choose 25 (maybe a bit less to speed up training) for the next models, we also need to train our best model before ASPP in 4-25 for fair comparison
+
+6. ASPP and Skip Connection
+- **_In DLAD-EX2-4-16_**
+- Batch size 4 and num epoch 25: G5_0428-1049_aspp_4_25_2_3x3_1x1_08a84
+
+7. Branched model
+
+8. Distillation Model
 
 # DLAD Exercise 2 
 
