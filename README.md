@@ -24,7 +24,9 @@
 3. Available is batch size 8 and epochs 32
 - 0.7 depth, semseg 0.3 (best): WandB: G5_0411-0757_adam_0.0001_8_32_0.7depth_a6901
 - 0.3 depth, semseg 0.7 (worst): WandB: G5_0409-0818_adam_0.0001_8_32_0.3depth_c1b69
-- **redo with batch size 4 and num epoch 16** ?!!
+- **redo with batch size 4 and num epoch 16** 
+- 0.35 depth, semseg 0.65: WandB: G5_0501-2035_4_16_0.35_depth_3a5e1
+- 0.65 depth, semseg 0.35: WandB: G5_0501-2027_4_16_0.65_depth_e02c5
 
 4. Init with Imagenet (pretrained)
 - only have this one in 8-16 for now: G5_0408-1628_adam_lr0_is_0.0001_8_16_pretrained_
