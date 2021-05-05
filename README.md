@@ -1,12 +1,8 @@
 # TO run
--ASPP 2 conv3x3 puis interpolate (sans conv1x1) 
-
--ASPP 1 conv3x3 + conv1x1 puis interpolate (en fonction des performances des 2conv3x3)
-
--branched model avec la meilleure architecture ASPP
-
--Task3 avec la meilleure architecture ASPP
-
+-resume 16-64 (for Task1)
+-batch size 2 num epochs 8 without pretrained(for Task1)
+-resume branched model (jusqu'a 25 epoch)
+-compare 1 conv 3x3 only and 1 conv 1x1 only for distillation (batch size 2 num epochs 16, Task 3)
 # TO SUBMIT TO CODALAB
 
 -> **Runs in batch size 4 and num epoch 16:**
