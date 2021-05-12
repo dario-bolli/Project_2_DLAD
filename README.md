@@ -1,8 +1,6 @@
 # TO run
--full 3x3 (extract features) puis 1x1 lr=0.0001 (running)
--full 3x3 (extract features) puis 1x1 lr=0.00008
--ASPP 3x3 puis 1x1 (running)
--branched 3x3 puis 1x1 ou 3x3 puis 3x3 (meilleure des 2 perf sur ASPP)
+-distillation (output of 1 and 2 after conv 3x3 and before conv 1x1, try sth else?)
+-branched tunning (learning rate, depth weighting)
 # TO SUBMIT TO CODALAB
 
 -> **Runs in batch size 4 and num epoch 16:**
