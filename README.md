@@ -1,6 +1,7 @@
 # TO run
 -distillation (output of 1 and 2 after conv 3x3 and before conv 1x1, try sth else?)
 -branched tunning (learning rate, depth weighting)
+a tester: baisser le weight de depth, comme il y'a une seule valeur a estimer, mais le meme nb de parametres que pour les 19 classes semantic
 # TO SUBMIT TO CODALAB
 
 -> **Runs in batch size 4 and num epoch 16:**
