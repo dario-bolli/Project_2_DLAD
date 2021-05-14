@@ -36,7 +36,7 @@ class ModelBranched(torch.nn.Module):
         features = self.encoder(x)
 
         # Uncomment to see the scales of feature pyramid with their respective number of channels.
-        print(", ".join([f"{k}:{v.shape[1]}" for k, v in features.items()]))
+        #print(", ".join([f"{k}:{v.shape[1]}" for k, v in features.items()]))
         lowest_scale = max(features.keys())
 
         features_lowest = features[lowest_scale]

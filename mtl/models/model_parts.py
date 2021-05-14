@@ -128,10 +128,7 @@ class DecoderDeeplabV3p(torch.nn.Module):
                                                             torch.nn.BatchNorm2d(48),torch.nn.ReLU())
         self.conv3x3 = torch.nn.Sequential(torch.nn.Conv2d(bottleneck_ch+48, 256, kernel_size=3, padding=1, bias = False),
                                            torch.nn.BatchNorm2d(256),
-                                           torch.nn.ReLU(),
-                                           torch.nn.Conv2d(256, 256, kernel_size=3, padding=1, bias = False),
-                                           torch.nn.BatchNorm2d(256),
-                                           torch.nn.ReLU()) # TEST with bias = true ?
+                                           torch.nn.ReLU())
         self.concatenation_to_predictions = torch.nn.Conv2d(256, num_out_ch, kernel_size=1, stride=1)      
                                                               
     def forward(self, features_bottleneck, features_skip_4x):
