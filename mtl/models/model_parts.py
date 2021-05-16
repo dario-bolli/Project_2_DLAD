@@ -180,14 +180,15 @@ class Decoder(torch.nn.Module):
 
         #sum of self-attention features and output of first decoder features
         #ATTENTION features_out_decoder nb channels must be equal to features_attention nb channels
-        summed_features = torch.zeros(features_attention.shape)
+        
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        features_attention = self.alpha.to(device)*features_attention
+        summed_features = torch.zeros(features_attention.shape).to(device)
+        features_attention = self.alpha.to(device)*features_attention.to(device)
+        features_out_decoder = features_out_decoder.to(device)
         for i in range(features_out_decoder.shape[1]):
             summed_features[:,i,:,:] =  features_attention[:,i,:,:]+features_out_decoder[:,i,:,:]
         
-        features_intermediate = summed_features
-        features_3x3 = self.conv3x3(features_intermediate)
+        features_3x3 = self.conv3x3(summed_features)
         #1x1 conv2d for final predictions
         predictions = self.concatenation_to_predictions(features_3x3)
 
