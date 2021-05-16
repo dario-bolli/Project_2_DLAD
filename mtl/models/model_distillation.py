@@ -30,13 +30,14 @@ class ModelDistillation(torch.nn.Module):
 
         self.decoder_depth = DecoderDeeplabV3p(256, ch_out_encoder_4x, 1)
 
+        num_features = 256
         #Self-Attention
-        self.attention_semseg = SelfAttention(256, 256)
-        self.attention_depth = SelfAttention(256, 256)
+        self.attention_semseg = SelfAttention(num_features, num_features)
+        self.attention_depth = SelfAttention(num_features, num_features)
 
         #Decoder 3 and 4
-        self.decoder3 = Decoder(256,256,ch_out-1)
-        self.decoder4 = Decoder(256,256,1)
+        self.decoder3 = Decoder(num_features,num_features,ch_out-1)
+        self.decoder4 = Decoder(num_features,num_features,1)
 
     def forward(self, x):
         input_resolution = (x.shape[2], x.shape[3])
@@ -58,7 +59,6 @@ class ModelDistillation(torch.nn.Module):
         features_task_depth = self.aspp_depth(features_lowest)
         predictions_4x_depth,features_dec2 = self.decoder_depth(features_task_depth, features[4])
         predictions_1x_depth = F.interpolate(predictions_4x_depth, size=input_resolution, mode='bilinear', align_corners=False)
-
         #Self-Attention
         features_attention_semseg = self.attention_semseg(features_dec1)
         features_attention_depth = self.attention_depth(features_dec2)
