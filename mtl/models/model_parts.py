@@ -129,11 +129,12 @@ class DecoderDeeplabV3p(torch.nn.Module):
         self.conv3x3 = torch.nn.Sequential(torch.nn.Conv2d(bottleneck_ch+48, 256, kernel_size=3, padding=1, bias = False),
                                            torch.nn.BatchNorm2d(256),
                                            torch.nn.ReLU(),
-                                           torch.nn.Conv2d(256, 256, kernel_size=3, padding=1, bias = False),
-                                           torch.nn.BatchNorm2d(256),
-                                           torch.nn.ReLU()) # TEST with bias = true ?
+                                           #torch.nn.Conv2d(256, 256, kernel_size=3, padding=1, bias = False),
+                                           #torch.nn.BatchNorm2d(256),
+                                           #torch.nn.ReLU() # TEST with bias = true ?
+                                            )                           
         self.concatenation_to_predictions = torch.nn.Conv2d(256, num_out_ch, kernel_size=1, stride=1)       
-                                                              
+
     def forward(self, features_bottleneck, features_skip_4x):
         """
         DeepLabV3+ style decoder
@@ -150,10 +151,11 @@ class DecoderDeeplabV3p(torch.nn.Module):
         #1x1 conv2d on lowest feature (skip)
         features_skip = self.features_to_concatenation(features_skip_4x)
         #concatenation of lowest feature and upsampled output of ASPP + 2 3x3 conv2d on concatenated features
-        features_cat = self.conv3x3(torch.cat([features_skip,features_ASPP], dim=1))
+        features_cat = torch.cat([features_skip,features_ASPP], dim=1)
+        features_3x3 = self.conv3x3(features_cat)
         #last 1x1 conv2d to get predictions
-        predictions = self.concatenation_to_predictions(features_cat)
-        return predictions, features_cat
+        predictions = self.concatenation_to_predictions(features_3x3)
+        return predictions, features_3x3
 
 
 class Decoder(torch.nn.Module):
@@ -161,35 +163,35 @@ class Decoder(torch.nn.Module):
         super(Decoder, self).__init__()
 
         # TODO: Implement a proper decoder with skip connections instead of the following
+        self.alpha = torch.nn.parameter.Parameter(torch.zeros(1))
         self.conv3x3 = torch.nn.Sequential(torch.nn.Conv2d(out_DeepLab_ch, 256, kernel_size=3, padding=1, bias = False),
                                            torch.nn.BatchNorm2d(256),
-                                           torch.nn.ReLU()) # TEST with bias = true ?
+                                           torch.nn.ReLU()
+                                            )
         self.concatenation_to_predictions = torch.nn.Conv2d(256, num_out_ch, kernel_size=1, stride=1) 
 
     def forward(self, features_attention, features_out_decoder):
         """
         DeepLabV3+ style decoder
-        :param features_bottleneck: bottleneck features of scale > 4
-        :param features_skip_4x: features of encoder of scale == 4
+        :param features_attention: features out of self-attention module
+        :param features_out_decoder: features out of decoder 1 or 2
         :return: features with 256 channels and the final tensor of predictions
         """
-        # TODO: Implement a proper decoder with skip connections instead of the following; keep returned
-        #       tensors in the same order and of the same shape.
-
-        #concatenation of features out of self-attention module and out of decoderDeeplab module
-        #features_cat = self.conv3x3(torch.cat([features_attention,features_out_decoder], dim=1))
 
         #sum of self-attention features and output of first decoder features
         #ATTENTION features_out_decoder nb channels must be equal to features_attention nb channels
-        summed_features = features_attention
-        #problem with cuda device torch.zeros(features_out_decoder.shape)
+        summed_features = torch.zeros(features_attention.shape)
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        features_attention = self.alpha.to(device)*features_attention
         for i in range(features_out_decoder.shape[1]):
             summed_features[:,i,:,:] =  features_attention[:,i,:,:]+features_out_decoder[:,i,:,:]
-        features_intermediate = self.conv3x3(summed_features)
+        
+        features_intermediate = summed_features
+        features_3x3 = self.conv3x3(features_intermediate)
         #1x1 conv2d for final predictions
-        predictions = self.concatenation_to_predictions(features_intermediate)
+        predictions = self.concatenation_to_predictions(features_3x3)
 
-        return predictions, features_intermediate
+        return predictions, features_3x3 
 
 
 class ASPPpart(torch.nn.Sequential):
